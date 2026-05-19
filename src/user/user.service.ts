@@ -8,7 +8,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
+import { escapeRegex } from '../common/utils/regex.util';
 
 @Injectable()
 export class UserService {
@@ -40,6 +41,14 @@ export class UserService {
 
   async findById(id: string) {
     return this.userModel.findById(id).exec();
+  }
+
+  async findIdsByNamePartial(name: string): Promise<Types.ObjectId[]> {
+    const users = await this.userModel
+      .find({ name: { $regex: escapeRegex(name.trim()), $options: 'i' } })
+      .select('_id')
+      .exec();
+    return users.map((user) => user._id as Types.ObjectId);
   }
 
   async findOne(id: string) {
