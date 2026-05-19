@@ -31,12 +31,12 @@ export class UserService {
     return this.userModel.findById(id).exec();
   }
 
-  async findOne(id: number) {
-    const user = await this.userModel.findOne({ where: { id: id } });
-    if (user) {
-      return user;
+  async findOne(id: string) {
+    const user = await this.userModel.findById(id).exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
-    throw new NotFoundException('User not found');
+    return user;
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
@@ -50,7 +50,7 @@ export class UserService {
     return this.userModel.findByIdAndUpdate(id, update, { new: true }).exec();
   }
 
-  remove(id: number) {
-    return this.userModel.findByIdAndDelete(id);
+  remove(id: string) {
+    return this.userModel.findByIdAndDelete(id).exec();
   }
 }
