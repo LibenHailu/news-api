@@ -18,6 +18,10 @@ export class UserService {
     return users;
   }
 
+  async findByEmail(email: string) {
+    return this.userModel.findOne({ email: email.toLowerCase().trim() }).exec();
+  }
+
   async findOne(id: number) {
     const user = await this.userModel.findOne({ where: { id: id } });
     if (user) {
