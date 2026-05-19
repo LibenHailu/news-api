@@ -9,12 +9,22 @@ import { map } from 'rxjs/operators';
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
-      map((data) => ({
-        success: true,
-        data,
-      })),
+      map((data: unknown) => {
+        if (
+          data &&
+          typeof data === 'object' &&
+          'success' in data &&
+          (data as { success: boolean }).success === false
+        ) {
+          return data;
+        }
+        return {
+          success: true,
+          data,
+        };
+      }),
     );
   }
 }

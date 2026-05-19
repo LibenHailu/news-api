@@ -5,16 +5,24 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Article, ArticleSchema } from './entities/article.entity';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
+import { LogModule } from '../log/log.module';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
+    LogModule,
     MongooseModule.forFeature([{ name: Article.name, schema: ArticleSchema }]),
   ],
   controllers: [ArticleController],
-  providers: [ArticleService, JwtAuthGuard, RolesGuard],
+  providers: [
+    ArticleService,
+    JwtAuthGuard,
+    OptionalJwtAuthGuard,
+    RolesGuard,
+  ],
 })
 export class ArticleModule {}

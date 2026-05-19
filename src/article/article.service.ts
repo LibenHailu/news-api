@@ -7,19 +7,30 @@ import {
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { QueryArticlesDto } from './dto/query-articles.dto';
+import { QueryMyArticlesDto } from './dto/query-my-articles.dto';
 import { Article, ArticleStatus } from './entities/article.entity';
 import { UserService } from '../user/user.service';
 import { isAuthor } from '../common/utils/role.util';
 import { escapeRegex } from '../common/utils/regex.util';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { ReadLogService } from '../log/log.service';
 
-export type PaginatedArticles = {
-  items: Article[];
+export type PaginatedArticles<T = Article> = {
+  items: T[];
   page: number;
   size: number;
   total: number;
   totalPages: number;
+};
+
+export type ArticleReadResult =
+  | { success: true; data: Article }
+  | { success: false; message: string };
+
+export type MyArticleItem = Article & {
+  createdAt?: Date;
+  displayStatus: string;
 };
 
 @Injectable()
@@ -27,6 +38,7 @@ export class ArticleService {
   constructor(
     @InjectModel(Article.name) private articleModel: Model<Article>,
     private readonly userService: UserService,
+    private readonly readLogService: ReadLogService,
   ) {}
 
   async create(createArticleDto: CreateArticleDto, userId: string) {
@@ -85,16 +97,72 @@ export class ArticleService {
     };
   }
 
-  async findByAuthor(authorId: string) {
-    return this.articleModel
-      .find({
-        authorId: new Types.ObjectId(authorId),
-        deletedAt: null,
-      })
-      .exec();
+  async findMyArticles(
+    authorId: string,
+    query: QueryMyArticlesDto,
+  ): Promise<PaginatedArticles<MyArticleItem>> {
+    const page = query.page ?? 1;
+    const size = query.size ?? 10;
+    const filter: Record<string, unknown> = {
+      authorId: new Types.ObjectId(authorId),
+    };
+
+    if (!query.includeDeleted) {
+      filter.deletedAt = null;
+    }
+
+    const skip = (page - 1) * size;
+    const [articles, total] = await Promise.all([
+      this.articleModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(size)
+        .exec(),
+      this.articleModel.countDocuments(filter).exec(),
+    ]);
+
+    const items: MyArticleItem[] = articles.map((article) => ({
+      ...article.toObject(),
+      displayStatus: article.deletedAt ? 'Deleted' : article.status,
+    }));
+
+    return {
+      items,
+      page,
+      size,
+      total,
+      totalPages: total === 0 ? 0 : Math.ceil(total / size),
+    };
   }
 
-  async findOne(id: string) {
+  async readArticle(
+    id: string,
+    readerId?: string | null,
+  ): Promise<ArticleReadResult> {
+    const article = await this.articleModel.findById(id).exec();
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    if (article.deletedAt) {
+      return {
+        success: false,
+        message: 'News article no longer available',
+      };
+    }
+
+    if (article.status !== ArticleStatus.PUBLISHED) {
+      throw new NotFoundException('Article not found');
+    }
+
+    await this.readLogService.recordRead(id, readerId ?? null);
+
+    return { success: true, data: article };
+  }
+
+  async findOneWithOutLog(id: string) {
     const article = await this.articleModel
       .findOne({ _id: id, deletedAt: null })
       .exec();
@@ -106,7 +174,7 @@ export class ArticleService {
 
   async update(id: string, updateArticleDto: UpdateArticleDto, userId: string) {
     await this.assertAuthorFromDb(userId);
-    const article = await this.findOne(id);
+    const article = await this.findOneWithOutLog(id);
     this.assertArticleOwner(article, userId);
     const updated = await this.articleModel
       .findByIdAndUpdate(id, updateArticleDto, { new: true })
@@ -119,7 +187,7 @@ export class ArticleService {
 
   async remove(id: string, userId: string) {
     await this.assertAuthorFromDb(userId);
-    const article = await this.findOne(id);
+    const article = await this.findOneWithOutLog(id);
     this.assertArticleOwner(article, userId);
     return this.articleModel
       .findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true })
