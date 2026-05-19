@@ -33,6 +33,13 @@ export class ArticleController {
     return this.articleService.create(createArticleDto, user.userId);
   }
 
+  @Get('me')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.AUTHOR)
+  findMine(@CurrentUser() user: JwtPayloadUser) {
+    return this.articleService.findByAuthor(user.userId);
+  }
+
   @Get()
   findAll() {
     return this.articleService.findAll();

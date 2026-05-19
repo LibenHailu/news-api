@@ -6,6 +6,7 @@ import { Article, ArticleSchema } from './entities/article.entity';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../user/user.module';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Module({
   imports: [
@@ -14,6 +15,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
     MongooseModule.forFeature([{ name: Article.name, schema: ArticleSchema }]),
   ],
   controllers: [ArticleController],
-  providers: [ArticleService, JwtAuthGuard],
+  providers: [ArticleService, JwtAuthGuard, RolesGuard],
 })
 export class ArticleModule {}

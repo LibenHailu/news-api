@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User, UserRole } from './entities/user.entity';
+import { User } from './entities/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -9,11 +14,17 @@ import { Model } from 'mongoose';
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
   async create(createUserDto: CreateUserDto) {
-    const user = await this.userModel.create({
+    let user = await this.userModel
+      .findOne({ email: createUserDto.email.toLowerCase().trim() })
+      .exec();
+    if (user) {
+      throw new HttpException('Duplicate email found', HttpStatus.CONFLICT);
+    }
+    user = await this.userModel.create({
       name: createUserDto.name,
       email: createUserDto.email,
       password: createUserDto.password,
-      role: UserRole.READER,
+      role: createUserDto.role,
     });
     return user.save();
   }

@@ -32,6 +32,15 @@ export class ArticleService {
     return this.articleModel.find({ deletedAt: null }).exec();
   }
 
+  async findByAuthor(authorId: string) {
+    return this.articleModel
+      .find({
+        authorId: new Types.ObjectId(authorId),
+        deletedAt: null,
+      })
+      .exec();
+  }
+
   async findOne(id: string) {
     const article = await this.articleModel
       .findOne({ _id: id, deletedAt: null })
@@ -63,7 +72,6 @@ export class ArticleService {
       .findByIdAndUpdate(id, { deletedAt: new Date() }, { new: true })
       .exec();
   }
-
 
   private async assertAuthorFromDb(userId: string): Promise<void> {
     if (!userId) {
