@@ -49,7 +49,7 @@ export class AuthorService {
     ]);
 
     const viewMap = await this.analyticsService.getTotalViewsByArticleIds(
-      articles.map((a) => a._id as Types.ObjectId),
+      articles.map((a) => a._id),
     );
 
     const items: DashboardItem[] = articles.map((article) => ({

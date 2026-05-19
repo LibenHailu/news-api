@@ -48,7 +48,7 @@ export class UserService {
       .find({ name: { $regex: escapeRegex(name.trim()), $options: 'i' } })
       .select('_id')
       .exec();
-    return users.map((user) => user._id as Types.ObjectId);
+    return users.map((user) => user._id);
   }
 
   async findOne(id: string) {

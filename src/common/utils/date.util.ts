@@ -1,8 +1,6 @@
-
 export function toGmtDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
-
 
 export function getGmtDayRange(dateKey: string): { start: Date; end: Date } {
   return {

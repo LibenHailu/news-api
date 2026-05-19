@@ -17,7 +17,6 @@ export class DailyAnalytics {
   })
   articleId: Types.ObjectId;
 
-  /** GMT date key YYYY-MM-DD */
   @Prop({ type: String, required: true, index: true })
   date: string;
 

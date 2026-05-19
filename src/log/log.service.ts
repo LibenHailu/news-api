@@ -5,7 +5,9 @@ import { ReadLog } from './entities/log.entity';
 
 @Injectable()
 export class ReadLogService {
-  constructor(@InjectModel(ReadLog.name) private readLogModel: Model<ReadLog>) {}
+  constructor(
+    @InjectModel(ReadLog.name) private readLogModel: Model<ReadLog>,
+  ) {}
 
   async recordRead(articleId: string, readerId?: string | null) {
     return this.readLogModel.create({

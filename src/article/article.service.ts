@@ -157,7 +157,7 @@ export class ArticleService {
       throw new NotFoundException('Article not found');
     }
 
-    await this.readLogService.recordRead(id, readerId ?? null);
+    this.readLogService.recordRead(id, readerId ?? null);
 
     return { success: true, data: article };
   }

@@ -13,7 +13,6 @@ export class AnalyticsScheduler {
     @InjectQueue(ANALYTICS_QUEUE) private readonly analyticsQueue: Queue,
   ) {}
 
-  /** Every day at 00:05 GMT — queue aggregation for yesterday. */
   @Cron('5 0 * * *', { timeZone: 'GMT' })
   async scheduleDailyAggregation(): Promise<void> {
     const dateKey = getYesterdayGmtDateKey();

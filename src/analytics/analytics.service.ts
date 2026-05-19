@@ -15,7 +15,6 @@ export class AnalyticsService {
     @InjectModel(ReadLog.name) private readLogModel: Model<ReadLog>,
   ) {}
 
-  /** Sum ReadLog rows for one article on one GMT date and upsert DailyAnalytics. */
   async aggregateForDate(dateKey: string): Promise<number> {
     const { start, end } = getGmtDayRange(dateKey);
 

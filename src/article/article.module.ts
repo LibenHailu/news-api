@@ -18,11 +18,6 @@ import { RolesGuard } from '../auth/guards/roles.guard';
     MongooseModule.forFeature([{ name: Article.name, schema: ArticleSchema }]),
   ],
   controllers: [ArticleController],
-  providers: [
-    ArticleService,
-    JwtAuthGuard,
-    OptionalJwtAuthGuard,
-    RolesGuard,
-  ],
+  providers: [ArticleService, JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard],
 })
 export class ArticleModule {}
