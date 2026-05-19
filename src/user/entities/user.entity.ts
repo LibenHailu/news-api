@@ -44,7 +44,7 @@ export class User {
 
   @Prop({
     type: String,
-    enum: UserRole,
+    enum: Object.values(UserRole),
     default: UserRole.READER,
   })
   role: UserRole;

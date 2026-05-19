@@ -1,13 +1,26 @@
-export class CreateArticleDto {
-  title: string;
-  content: string;
-  category: string;
-  status: ArticleStatus;
-  authorId: string;
-  deletedAt: Date | null;
-}
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import { ArticleStatus } from '../entities/article.entity';
 
-export enum ArticleStatus {
-  DRAFT = 'Draft',
-  PUBLISHED = 'Published',
+export class CreateArticleDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(150)
+  title: string;
+
+  @IsString()
+  @MinLength(50)
+  content: string;
+
+  @IsString()
+  @IsNotEmpty()
+  category: string;
+
+  @IsEnum(ArticleStatus)
+  status?: ArticleStatus = ArticleStatus.DRAFT;
 }

@@ -61,26 +61,3 @@ export class Article {
 }
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);
-// ArticleSchema.pre('save', async function (next) {
-//   const article = this as any;
-
-//   const user = await article.model('User').findById(article.authorId);
-
-//   if (!user) {
-//     return next(
-//       new Error(
-//         'The assigned authorId does not map to an existing User record.',
-//       ),
-//     );
-//   }
-
-//   if (user.role !== 'author') {
-//     return next(
-//       new Error(
-//         'Article assignment rejected: User must possess the role of "author".',
-//       ),
-//     );
-//   }
-
-//   next();
-// });
