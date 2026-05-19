@@ -159,7 +159,7 @@ export class ArticleService {
 
     this.readLogService.recordRead(id, readerId ?? null);
 
-    return { success: true, data: article };
+    return article;
   }
 
   async findOneWithOutLog(id: string) {
